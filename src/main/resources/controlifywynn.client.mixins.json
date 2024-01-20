@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "com.github.aws404.controlifywynn.mixin.client",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "AbstractContainerScreenProcessorMixin",
+    "ContainerScreenMixin",
+    "EntityRendererMixin",
+    "GamepadBindAccessor",
+    "HandledScreenAccessor",
+    "KeyBindAccessor",
+    "KeyBindManagerMixin",
+    "wynntilsscreens.WynntilsListScreenMixin",
+    "wynntilsscreens.WynntilsMenuScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "WynntilsMenuScreenBaseAccessor"
+  ]
+}

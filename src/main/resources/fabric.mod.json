@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "controlifywynn",
+  "version": "${version}",
+  "name": "Controlify Wynn",
+  "description": "Add enhanced controller support to Wynncraft through integrations with Controlify and Wynntils",
+  "authors": [
+    "aws404"
+  ],
+  "contact": {
+    "sources": "https://github.com/aws404/ControlifyWynn"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/controlifywynn/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.github.aws404.controlifywynn.ControlifyWynnMod"
+    ],
+    "controlify": [
+      "com.github.aws404.controlifywynn.WynnControlifyEntrypoint"
+    ]
+  },
+  "mixins": [
+    "controlifywynn.client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "1.20.2",
+    "java": ">=17",
+    "fabric-api": "*",
+    "controlify": "*",
+    "wynntils": "*"
+  }
+}
