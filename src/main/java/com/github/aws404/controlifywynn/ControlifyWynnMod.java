@@ -2,7 +2,9 @@ package com.github.aws404.controlifywynn;
 
 import com.wynntils.core.components.Managers;
 import com.wynntils.core.components.Models;
+import com.wynntils.features.overlays.NpcDialogueOverlayFeature;
 import com.wynntils.features.ui.ContainerScrollFeature;
+import com.wynntils.overlays.NpcDialogueOverlay;
 import com.wynntils.utils.mc.McUtils;
 import com.wynntils.utils.wynn.ContainerUtils;
 import dev.isxander.controlify.Controlify;
@@ -12,20 +14,28 @@ import dev.isxander.controlify.api.vmousesnapping.SnapPoint;
 import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFW;
 
+import com.github.aws404.controlifywynn.mixin.client.ChatHudAccessor;
 import com.github.aws404.controlifywynn.mixin.client.HandledScreenAccessor;
+import com.github.aws404.controlifywynn.mixin.client.NpcDialogueOverlayAccessor;
+import com.github.aws404.controlifywynn.mixin.client.NpcDialogueOverlayFeatureAccessor;
 
 import net.fabricmc.api.ClientModInitializer;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.util.Window;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ControlifyWynnMod implements ClientModInitializer {
+	private static final ScheduledExecutorService UN_PRESS_SHIFT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
 	@Override
 	public void onInitializeClient() {
@@ -45,8 +55,33 @@ public class ControlifyWynnMod implements ClientModInitializer {
 			if (McUtils.mc() == null || McUtils.player() == null || McUtils.containerMenu() == null) {
 				return;
 			}
-			Screen screen = McUtils.mc().currentScreen;
 
+			// Don't trigger sneaking if the user presses sneak it in dialogue, just send the packets
+			if (controller.bindings().SNEAK.justPressed() && !McUtils.player().isSneaking()) {
+				// Test for Wynntils Dialogue or vanilla chat dialogue
+				NpcDialogueOverlayFeature dialogueOverlayFeature = Managers.Feature.getFeatureInstance(NpcDialogueOverlayFeature.class);
+				NpcDialogueOverlay dialogueOverlay = ((NpcDialogueOverlayFeatureAccessor) dialogueOverlayFeature).getNpcDialogueOverlay();
+				if (!((NpcDialogueOverlayAccessor) dialogueOverlay).getCurrentDialogue().isEmpty() ||
+						!((NpcDialogueOverlayAccessor) dialogueOverlay).getConfirmationlessDialogues().isEmpty()
+				) {
+					nextDialogueMessage();
+					controller.clearState();
+				} else if (((ChatHudAccessor) McUtils.mc().inGameHud.getChatHud()).getVisibleMessages().size() > 2) {
+					// Check if Press SHIFT message is in the chat
+					StringBuilder builder = new StringBuilder();
+					((ChatHudAccessor) McUtils.mc().inGameHud.getChatHud()).getVisibleMessages().get(1).content().accept((index, style, codePoint) -> {
+						builder.append((char) codePoint);
+						return true;
+					});
+
+					if (Objects.equals(builder.toString(), "                   Press SHIFT to continue")) {
+						nextDialogueMessage();
+						controller.clearState();
+					}
+				}
+			}
+
+			Screen screen = McUtils.mc().currentScreen;
 			if (!(screen instanceof GenericContainerScreen gui)) return;
 
 			// Go to next page if next tab is pressed in a recognised menu
@@ -93,9 +128,23 @@ public class ControlifyWynnMod implements ClientModInitializer {
 					Controlify.instance().virtualMouseHandler().snapToPoint(new SnapPoint(slotXPos, slotYPos, 0), scaleFactor);
 				}
 
+				ContainerUtils.clickOnSlot(
+						8,
+						gui.getScreenHandler().syncId,
+						GLFW.GLFW_MOUSE_BUTTON_LEFT,
+						gui.getScreenHandler().getStacks()
+				);
+
 				// Clear the state so no further actions occur
 				controller.clearState();
 			}
 		});
+	}
+
+	private static void nextDialogueMessage() {
+		McUtils.sendPacket(new ClientCommandC2SPacket(McUtils.player(), ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+		// Trigger an un-press 1/2 a second later
+		UN_PRESS_SHIFT_EXECUTOR.schedule(() -> McUtils.sendPacket(new ClientCommandC2SPacket(McUtils.player(), ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY)), 500, TimeUnit.MILLISECONDS);
+
 	}
 }

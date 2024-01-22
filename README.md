@@ -54,7 +54,8 @@ Through playing Wynncraft with an Xbox controller, this is the configuration tha
 ## WIP/Upcomming Features
 
 - Improved Wynntils GUI navigation
-- Imporved Wynncraft GUI navigation and usage
+- Improved Wynncraft GUI navigation and usage
+- Allow dialogue option selection (possibly through a radial menu)
 
 ## License
 

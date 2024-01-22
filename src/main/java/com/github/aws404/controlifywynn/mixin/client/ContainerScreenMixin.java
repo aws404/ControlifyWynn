@@ -1,13 +1,13 @@
 package com.github.aws404.controlifywynn.mixin.client;
 
 import com.wynntils.core.components.Models;
+import com.wynntils.core.text.StyledText;
 import dev.isxander.controlify.Controlify;
 import dev.isxander.controlify.api.bind.BindRenderer;
 import dev.isxander.controlify.api.vmousesnapping.ISnapBehaviour;
 import dev.isxander.controlify.api.vmousesnapping.SnapPoint;
 import dev.isxander.controlify.compatibility.ControlifyCompat;
 import dev.isxander.controlify.controller.Controller;
-import dev.isxander.controlify.gui.DrawSize;
 import org.apache.commons.lang3.ArrayUtils;
 import org.joml.Vector2i;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,10 +23,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -37,8 +39,10 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
             (stack.isOf(Items.GOLDEN_SHOVEL) && ArrayUtils.contains(IGNORED_GOLDEN_SHOVEL_ITEMS, stack.getDamage())) ||
             stack.isOf(Items.STRUCTURE_VOID) ||
             stack.getName().getString().isBlank() ||
-            stack.getName().getString().contains("Click on an item to purchase it") ||
-            stack.isEmpty();
+            stack.getName().getString().contains("Click on an item to purchase it");
+    private static final Predicate<Slot> NOT_GUI = (slot) -> !IS_GUI_ITEM.test(slot.getStack());
+    private static final Predicate<Slot> NOT_GUI_OR_EMPTY = NOT_GUI.and(Slot::hasStack);
+    private static final Predicate<Slot> IS_PLAYER_OR_NOT_GUI_OR_EMPTY = NOT_GUI_OR_EMPTY.or(slot -> slot.inventory instanceof PlayerInventory);
 
     public ContainerScreenMixin(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) { super(handler, inventory, title); }
 
@@ -47,16 +51,19 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public Set<SnapPoint> getSnapPoints() {
-        // Act normally if in bank
-        if (Models.Bank.getCurrentContainer() != null) {
-            return this.getScreenHandler().slots.stream()
-                    .map(slot -> new SnapPoint(new Vector2i(this.x + slot.x + 8, this.y + slot.y + 8), 17))
-                    .collect(Collectors.toSet());
+        // By default, only snap to filled slots that aren't GUI items
+        Predicate<Slot> filter = NOT_GUI_OR_EMPTY;
+
+        if (Models.Bank.getCurrentContainer() != null || StyledText.fromComponent(this.title).endsWith(" Pouch")) {
+            // In banks and pouches, snap to all items except GUI items
+            filter = NOT_GUI;
+        } else if (Models.Container.isLootOrRewardChest(this)) {
+            // In loot and reward chests, snap to all player inventory slots and only filled chest slots
+            filter = IS_PLAYER_OR_NOT_GUI_OR_EMPTY;
         }
 
-        // If this any other screen, limit the snap points to remove gui elements, and empty slots
         return this.getScreenHandler().slots.stream()
-                .filter(slot -> !IS_GUI_ITEM.test(slot.getStack()))
+                .filter(filter)
                 .map(slot -> new SnapPoint(new Vector2i(this.x + slot.x + 8, this.y + slot.y + 8), 17))
                 .collect(Collectors.toSet());
     }

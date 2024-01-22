@@ -11,12 +11,13 @@
     "KeyBindAccessor",
     "KeyBindManagerMixin",
     "wynntilsscreens.WynntilsListScreenMixin",
-    "wynntilsscreens.WynntilsMenuScreenMixin"
+    "wynntilsscreens.WynntilsMenuScreenMixin",
+    "ChatHudAccessor",
+    "NpcDialogueOverlayAccessor",
+    "NpcDialogueOverlayFeatureAccessor",
+    "WynntilsMenuScreenBaseAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "WynntilsMenuScreenBaseAccessor"
-  ]
+  }
 }

@@ -75,6 +75,26 @@ public class KeyBindManagerMixin {
             return RadialIcons.getItem(Items.COMMAND_BLOCK);
         }
 
+        if (Objects.equals(keyBind.getName(), "Gammabright")) {
+            return RadialIcons.getItem(Items.ENDER_EYE);
+        }
+
+        if (Objects.equals(keyBind.getName(), "Open Emerald Pouch")) {
+            return RadialIcons.getItem(Items.EMERALD);
+        }
+
+        if (Objects.equals(keyBind.getName(), "Open Wynntils Menu")) {
+            return RadialIcons.getItem(Items.ENCHANTED_BOOK);
+        }
+
+        if (Objects.equals(keyBind.getName(), "Open Powder Menu")) {
+            return RadialIcons.getItem(Items.RED_DYE);
+        }
+
+        if (Objects.equals(keyBind.getName(), "Open Item Guide")) {
+            return RadialIcons.getItem(Items.SHEARS);
+        }
+
         return RadialIcons.getItem(Items.BARRIER);
 
     }
