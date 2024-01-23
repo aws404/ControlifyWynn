@@ -7,6 +7,9 @@
 
 name: publish
 
+permissions:
+  contents: write
+  
 on:
   workflow_dispatch:
   release:
@@ -35,12 +38,14 @@ jobs:
           output="$(find build/libs/ ! -name "*-dev.jar" ! -name "*-sources.jar" -type f -printf "%f\n")"
           echo "jarname=$output" >> $GITHUB_OUTPUT
           
-      - name: Update release
-        uses: johnwbyrd/update-release@v1.0.0
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@2.7.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          files: build/libs/${{ steps.findjar.outputs.jarname }}
-    
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/libs/${{ steps.findjar.outputs.jarname }}
+          tag: ${{ github.ref }}
+          overwrite: true
+          
       - name: Upload to Modrinth
         uses: RubixDev/modrinth-upload@v1
         with:
