@@ -34,7 +34,13 @@ jobs:
         run: |
           output="$(find build/libs/ ! -name "*-dev.jar" ! -name "*-sources.jar" -type f -printf "%f\n")"
           echo "jarname=$output" >> $GITHUB_OUTPUT
-
+          
+      - name: Update release
+        uses: johnwbyrd/update-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: build/libs/${{ steps.findjar.outputs.jarname }}
+    
       - name: Upload to Modrinth
         uses: RubixDev/modrinth-upload@v1
         with:
