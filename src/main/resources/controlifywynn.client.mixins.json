@@ -13,8 +13,6 @@
     "wynntilsscreens.WynntilsListScreenMixin",
     "wynntilsscreens.WynntilsMenuScreenMixin",
     "ChatHudAccessor",
-    "NpcDialogueOverlayAccessor",
-    "NpcDialogueOverlayFeatureAccessor",
     "WynntilsMenuScreenBaseAccessor"
   ],
   "injectors": {
