@@ -2,6 +2,7 @@ package com.github.aws404.controlifywynn.mixin.client;
 
 import com.wynntils.core.components.Models;
 import com.wynntils.core.text.StyledText;
+import com.wynntils.models.containers.type.InteractiveContainerType;
 import dev.isxander.controlify.Controlify;
 import dev.isxander.controlify.api.bind.BindRenderer;
 import dev.isxander.controlify.api.vmousesnapping.ISnapBehaviour;
@@ -87,14 +88,14 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         ControlifyCompat.ifBeginHudBatching();
 
         // Render left scroll if available
-        Optional<Integer> scrollLeft = Models.Container.getScrollSlot(this, true);
+        Optional<Integer> scrollLeft = InteractiveContainerType.getScrollButton(this, true);;
         if (scrollLeft.isPresent() && this.handler.getSlot(scrollLeft.get()).hasStack()) {
             BindRenderer renderer = controller.bindings().GUI_PREV_TAB.renderer();
             renderer.render(graphics, this.x - renderer.size().width() - 4, this.y - 8);
         }
 
         // Render right scroll if available
-        Optional<Integer> scrollRight = Models.Container.getScrollSlot(this, false);
+        Optional<Integer> scrollRight = InteractiveContainerType.getScrollButton(this, false);;
         if (scrollRight.isPresent() && this.handler.getSlot(scrollRight.get()).hasStack()) {
             BindRenderer renderer = controller.bindings().GUI_NEXT_TAB.renderer();
             renderer.render(graphics, this.x + this.backgroundWidth + 4, this.y - 8);

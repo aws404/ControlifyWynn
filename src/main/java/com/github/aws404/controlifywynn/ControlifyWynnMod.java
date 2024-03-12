@@ -2,9 +2,9 @@ package com.github.aws404.controlifywynn;
 
 import com.wynntils.core.components.Managers;
 import com.wynntils.core.components.Models;
-import com.wynntils.features.overlays.NpcDialogueOverlayFeature;
+import com.wynntils.features.overlays.NpcDialogueFeature;
 import com.wynntils.features.ui.ContainerScrollFeature;
-import com.wynntils.overlays.NpcDialogueOverlay;
+import com.wynntils.models.containers.type.InteractiveContainerType;
 import com.wynntils.utils.mc.McUtils;
 import com.wynntils.utils.wynn.ContainerUtils;
 import dev.isxander.controlify.Controlify;
@@ -16,8 +16,6 @@ import org.lwjgl.glfw.GLFW;
 
 import com.github.aws404.controlifywynn.mixin.client.ChatHudAccessor;
 import com.github.aws404.controlifywynn.mixin.client.HandledScreenAccessor;
-import com.github.aws404.controlifywynn.mixin.client.NpcDialogueOverlayAccessor;
-import com.github.aws404.controlifywynn.mixin.client.NpcDialogueOverlayFeatureAccessor;
 
 import net.fabricmc.api.ClientModInitializer;
 
@@ -59,11 +57,8 @@ public class ControlifyWynnMod implements ClientModInitializer {
 			// Don't trigger sneaking if the user presses sneak it in dialogue, just send the packets
 			if (controller.bindings().SNEAK.justPressed() && !McUtils.player().isSneaking()) {
 				// Test for Wynntils Dialogue or vanilla chat dialogue
-				NpcDialogueOverlayFeature dialogueOverlayFeature = Managers.Feature.getFeatureInstance(NpcDialogueOverlayFeature.class);
-				NpcDialogueOverlay dialogueOverlay = ((NpcDialogueOverlayFeatureAccessor) dialogueOverlayFeature).getNpcDialogueOverlay();
-				if (!((NpcDialogueOverlayAccessor) dialogueOverlay).getCurrentDialogue().isEmpty() ||
-						!((NpcDialogueOverlayAccessor) dialogueOverlay).getConfirmationlessDialogues().isEmpty()
-				) {
+				NpcDialogueFeature dialogueOverlayFeature = Managers.Feature.getFeatureInstance(NpcDialogueFeature.class);
+				if (!Models.NpcDialogue.getCurrentDialogue().isEmpty() || !Models.NpcDialogue.getConfirmationlessDialogues().isEmpty()) {
 					nextDialogueMessage();
 					controller.clearState();
 				} else if (((ChatHudAccessor) McUtils.mc().inGameHud.getChatHud()).getVisibleMessages().size() > 2) {
@@ -87,7 +82,7 @@ public class ControlifyWynnMod implements ClientModInitializer {
 			// Go to next page if next tab is pressed in a recognised menu
 			if (controller.bindings().GUI_NEXT_TAB.justPressed()) {
 				boolean scrollUp = Managers.Feature.getFeatureInstance(ContainerScrollFeature.class).invertScroll.get();
-				Optional<Integer> slot = Models.Container.getScrollSlot(gui, scrollUp);
+				Optional<Integer> slot = InteractiveContainerType.getScrollButton(gui, scrollUp);
 				if (slot.isEmpty()) return;
 
 				ContainerUtils.clickOnSlot(
@@ -101,7 +96,7 @@ public class ControlifyWynnMod implements ClientModInitializer {
 			// Go to previous page if next tab is pressed in a recognised menu
 			if (controller.bindings().GUI_PREV_TAB.justPressed()) {
 				boolean scrollUp = !Managers.Feature.getFeatureInstance(ContainerScrollFeature.class).invertScroll.get();
-				Optional<Integer> slot = Models.Container.getScrollSlot(gui, scrollUp);
+				Optional<Integer> slot = InteractiveContainerType.getScrollButton(gui, scrollUp);
 				if (slot.isEmpty()) return;
 
 				ContainerUtils.clickOnSlot(
