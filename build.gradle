@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.4-SNAPSHOT'
+	id 'fabric-loom' version '1.5-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -39,7 +39,7 @@ dependencies {
 
 	modImplementation "maven.modrinth:controlify:1.7.0+1.20.2"
 	modImplementation "maven.modrinth:yacl:3.3.0-beta.1+1.20.2-fabric"
-	modImplementation "maven.modrinth:wynntils:gb8QtkKN"
+	modImplementation "maven.modrinth:wynntils:Wpfu6h3N"
 	implementation "org.hid4java:hid4java:0.7.0"
 
 	include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.2")))

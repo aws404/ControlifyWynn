@@ -4,7 +4,7 @@ import com.wynntils.core.components.Managers;
 import com.wynntils.core.components.Models;
 import com.wynntils.features.overlays.NpcDialogueFeature;
 import com.wynntils.features.ui.ContainerScrollFeature;
-import com.wynntils.models.containers.type.InteractiveContainerType;
+import com.wynntils.models.containers.type.ScrollableContainerProperty;
 import com.wynntils.utils.mc.McUtils;
 import com.wynntils.utils.wynn.ContainerUtils;
 import dev.isxander.controlify.Controlify;
@@ -78,15 +78,16 @@ public class ControlifyWynnMod implements ClientModInitializer {
 
 			Screen screen = McUtils.mc().currentScreen;
 			if (!(screen instanceof GenericContainerScreen gui)) return;
+			if (!(Models.Container.getCurrentContainer() instanceof ScrollableContainerProperty scrollableContainer)) return;
 
 			// Go to next page if next tab is pressed in a recognised menu
 			if (controller.bindings().GUI_NEXT_TAB.justPressed()) {
 				boolean scrollUp = Managers.Feature.getFeatureInstance(ContainerScrollFeature.class).invertScroll.get();
-				Optional<Integer> slot = InteractiveContainerType.getScrollButton(gui, scrollUp);
-				if (slot.isEmpty()) return;
+
+				int slot = scrollUp ? scrollableContainer.getPreviousItemSlot() : scrollableContainer.getNextItemSlot();
 
 				ContainerUtils.clickOnSlot(
-						slot.get(),
+						slot,
 						gui.getScreenHandler().syncId,
 						GLFW.GLFW_MOUSE_BUTTON_LEFT,
 						gui.getScreenHandler().getStacks()
@@ -96,11 +97,11 @@ public class ControlifyWynnMod implements ClientModInitializer {
 			// Go to previous page if next tab is pressed in a recognised menu
 			if (controller.bindings().GUI_PREV_TAB.justPressed()) {
 				boolean scrollUp = !Managers.Feature.getFeatureInstance(ContainerScrollFeature.class).invertScroll.get();
-				Optional<Integer> slot = InteractiveContainerType.getScrollButton(gui, scrollUp);
-				if (slot.isEmpty()) return;
+
+				int slot = scrollUp ? scrollableContainer.getPreviousItemSlot() : scrollableContainer.getNextItemSlot();
 
 				ContainerUtils.clickOnSlot(
-						slot.get(),
+						slot,
 						gui.getScreenHandler().syncId,
 						GLFW.GLFW_MOUSE_BUTTON_LEFT,
 						gui.getScreenHandler().getStacks()

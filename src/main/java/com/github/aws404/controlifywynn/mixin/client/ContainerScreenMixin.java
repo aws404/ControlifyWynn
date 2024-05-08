@@ -2,7 +2,8 @@ package com.github.aws404.controlifywynn.mixin.client;
 
 import com.wynntils.core.components.Models;
 import com.wynntils.core.text.StyledText;
-import com.wynntils.models.containers.type.InteractiveContainerType;
+import com.wynntils.models.containers.containers.reward.RewardContainer;
+import com.wynntils.models.containers.type.ScrollableContainerProperty;
 import dev.isxander.controlify.Controlify;
 import dev.isxander.controlify.api.bind.BindRenderer;
 import dev.isxander.controlify.api.vmousesnapping.ISnapBehaviour;
@@ -55,10 +56,10 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         // By default, only snap to filled slots that aren't GUI items
         Predicate<Slot> filter = NOT_GUI_OR_EMPTY;
 
-        if (Models.Bank.getCurrentContainer() != null || StyledText.fromComponent(this.title).endsWith(" Pouch")) {
+        if (Models.Bank.getStorageContainerType() != null || StyledText.fromComponent(this.title).endsWith(" Pouch")) {
             // In banks and pouches, snap to all items except GUI items
             filter = NOT_GUI;
-        } else if (Models.Container.isLootOrRewardChest(this)) {
+        } else if (Models.Container.getCurrentContainer() instanceof RewardContainer) {
             // In loot and reward chests, snap to all player inventory slots and only filled chest slots
             filter = IS_PLAYER_OR_NOT_GUI_OR_EMPTY;
         }
@@ -85,18 +86,19 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
     }
 
     private void renderControllerButtonOverlay(DrawContext graphics, Controller<?, ?> controller) {
+        if (!(Models.Container.getCurrentContainer() instanceof ScrollableContainerProperty scrollableContainer)) return;
         ControlifyCompat.ifBeginHudBatching();
 
         // Render left scroll if available
-        Optional<Integer> scrollLeft = InteractiveContainerType.getScrollButton(this, true);;
-        if (scrollLeft.isPresent() && this.handler.getSlot(scrollLeft.get()).hasStack()) {
+        int scrollLeft = scrollableContainer.getPreviousItemSlot();
+        if (this.handler.getSlot(scrollLeft).hasStack()) {
             BindRenderer renderer = controller.bindings().GUI_PREV_TAB.renderer();
             renderer.render(graphics, this.x - renderer.size().width() - 4, this.y - 8);
         }
 
         // Render right scroll if available
-        Optional<Integer> scrollRight = InteractiveContainerType.getScrollButton(this, false);;
-        if (scrollRight.isPresent() && this.handler.getSlot(scrollRight.get()).hasStack()) {
+        int scrollRight = scrollableContainer.getNextItemSlot();
+        if (this.handler.getSlot(scrollRight).hasStack()) {
             BindRenderer renderer = controller.bindings().GUI_NEXT_TAB.renderer();
             renderer.render(graphics, this.x + this.backgroundWidth + 4, this.y - 8);
         }
