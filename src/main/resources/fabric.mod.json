@@ -30,6 +30,6 @@
     "java": ">=17",
     "fabric-api": "*",
     "controlify": "*",
-    "wynntils": ">=1.0.0"
+    "wynntils": ">=1.2.0"
   }
 }
